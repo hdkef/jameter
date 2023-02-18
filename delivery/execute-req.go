@@ -6,12 +6,13 @@ import (
 	"sync"
 
 	"github.com/hdkef/jameter/models"
+	"github.com/hdkef/jameter/usecase"
 )
 
 func resChanListener(resultC chan interface{}, wg *sync.WaitGroup, closeC chan bool) {
 	for {
 		res := <-resultC
-		fmt.Println("response :\n", res)
+		fmt.Println("\n", res)
 		wg.Done()
 		if done := <-closeC; done {
 			break
@@ -60,7 +61,51 @@ func hit(r *models.ReqsWrapper, resultC chan interface{}, wg *sync.WaitGroup, cl
 }
 
 func ExecuteByIDS(project *models.Project) {
+	var resultC chan interface{} = make(chan interface{})
+	var doneC chan bool = make(chan bool)
 
+	//input ids to be executed
+	prompter := usecase.Prompt{}
+	idSlice, msg, v := prompter.GetReqIDSlice()
+	if !v {
+		fmt.Println(msg)
+		return
+	}
+
+	//validate reqs
+	if len(idSlice) == 0 {
+		fmt.Println("No reqs found")
+		close(resultC)
+		close(doneC)
+		return
+	}
+
+	//create waitGroup
+	wg := sync.WaitGroup{}
+
+	//create http client
+	client := &http.Client{}
+
+	//execute every req based on input
+	for _, v := range idSlice {
+		for _, k := range project.Reqs {
+			if k.ID == v {
+				wg.Add(1)
+				go hit(&k, resultC, &wg, client)
+			}
+		}
+	}
+
+	//listener
+	go resChanListener(resultC, &wg, doneC)
+
+	//wait for response completed
+	wg.Wait()
+
+	//if all executed, close listener
+	doneC <- true
+	close(resultC)
+	close(doneC)
 }
 
 func ExecuteAll(project *models.Project) {
@@ -72,6 +117,14 @@ func ExecuteAll(project *models.Project) {
 
 	//create http client
 	client := &http.Client{}
+
+	//validate reqs
+	if len(project.Reqs) == 0 {
+		fmt.Println("No reqs found")
+		close(resultC)
+		close(doneC)
+		return
+	}
 
 	//execute every req
 	for _, v := range project.Reqs {
@@ -87,6 +140,8 @@ func ExecuteAll(project *models.Project) {
 
 	//if all executed, close listener
 	doneC <- true
+	close(resultC)
+	close(doneC)
 }
 
 func ExecuteRequest(project *models.Project) (menu int) {
