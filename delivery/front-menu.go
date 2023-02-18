@@ -11,7 +11,7 @@ import (
 
 func inputProjectName(name *string) (msg string, valid bool) {
 	var validator usecase.Validator
-	fmt.Print("Input project name: ")
+	fmt.Print("\nInput project name: ")
 	//input project name
 	_, err := fmt.Scanln(name)
 	if err != nil {
@@ -79,7 +79,7 @@ func FrontMenu(project *models.Project) (msg string, valid bool) {
 	var menu int = -1
 
 	for menu != 0 {
-		fmt.Print("1.Open project\n2.Create new project\n3.Exit\n\nChoose menu : ")
+		fmt.Print("\n\n1.Open project\n2.Create new project\n3.Exit\n\nChoose menu : ")
 		_, err := fmt.Scanln(&menu)
 		if err != nil {
 			msg = "Invalid menu"

@@ -32,7 +32,7 @@ func ReadRequest(project *models.Project) (menu int) {
 				fmt.Println("payload type cast fail")
 				return -1
 			}
-			fmt.Printf("Payload\t\t : %s\n", p.Data)
+			fmt.Printf("Payload\t\t: %s\n", p.Data)
 		}
 	}
 	return -1
