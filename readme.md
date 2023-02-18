@@ -1,6 +1,6 @@
 # JAMETER
 
-Jameter is a cli REST API testing tool created with Golang,
+Jameter is a cli REST API testing tool and load testing tool created with Golang,
 
 # features
 Jameter are still in development, but i am planned to create these in the future
