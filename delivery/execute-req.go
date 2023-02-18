@@ -27,10 +27,12 @@ out:
 			var output string
 
 			//handle response body according to MIME type
-			defer res.Res.Body.Close()
+
 			bodyBytes, err := io.ReadAll(res.Res.Body)
 			if err != nil {
 				fmt.Print(err.Error())
+				wg.Done()
+				return
 			}
 			var body interface{}
 			if res.Res.Header.Get("Accept") == "application/json" {
@@ -43,6 +45,8 @@ out:
 			} else {
 				body = string(bodyBytes)
 			}
+
+			res.Res.Body.Close()
 
 			output += fmt.Sprint("Date\t: ", time.Now().String(), "\n")
 			output += fmt.Sprint("Status Code\t: ", res.Res.StatusCode, "\n")
@@ -70,11 +74,15 @@ out:
 			f, err := os.OpenFile(fileDir, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
 				fmt.Print(err.Error())
+				wg.Done()
+				return
 			}
 
 			defer f.Close()
 			if _, err := f.WriteString(output); err != nil {
 				fmt.Print(err.Error())
+				wg.Done()
+				return
 			}
 
 			//print result status
