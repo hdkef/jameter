@@ -34,6 +34,7 @@ func ReadRequest(project *models.Project) (menu int) {
 			}
 			fmt.Printf("Payload\t\t: %s\n", p.Data)
 		}
+		fmt.Println("")
 	}
 	return -1
 }
