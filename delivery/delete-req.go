@@ -1,13 +1,10 @@
 package delivery
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
 
 	"github.com/hdkef/jameter/models"
+	"github.com/hdkef/jameter/usecase"
 )
 
 func DeleteRequest(project *models.Project) (menu int) {
@@ -15,20 +12,11 @@ func DeleteRequest(project *models.Project) (menu int) {
 	ReadRequest(project)
 
 	//input ids to be deleted
-	fmt.Print("\nInput request ids (separated by space) :")
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	idStr := scanner.Text()
-
-	idSlice := []int{}
-
-	for _, v := range strings.Split(idStr, " ") {
-		id, err := strconv.Atoi(v)
-		if err != nil {
-			fmt.Println("Invalid id")
-			return -1
-		}
-		idSlice = append(idSlice, id)
+	prompter := usecase.Prompt{}
+	idSlice, msg, v := prompter.GetReqIDSlice()
+	if !v {
+		fmt.Println(msg)
+		return -1
 	}
 
 	//delete from projects
