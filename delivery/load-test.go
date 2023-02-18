@@ -73,7 +73,7 @@ func loadTestByTotalReqs(project *models.Project, req models.ReqsWrapper) int {
 			continue
 		}
 		if totalReqs <= 0 {
-			fmt.Println("Input cannot be <= 0")
+			fmt.Println("Total req cannot be <= 0")
 			continue
 		}
 		validTotalReq = true
@@ -99,7 +99,7 @@ func loadTestByTotalReqs(project *models.Project, req models.ReqsWrapper) int {
 	timeTaken := time.Since(startTime).Milliseconds()
 
 	fmt.Printf("URI\t\t\t: %s\n", req.URI)
-	fmt.Printf("total requests\t: %d\n", counter)
+	fmt.Printf("total requests\t\t: %d\n", counter)
 	fmt.Printf("time taken\t\t: %d ms\n", timeTaken)
 	fmt.Printf("throughput\t\t: %.3f req/s\n", 1000*float64(totalReqs)/float64(timeTaken))
 
