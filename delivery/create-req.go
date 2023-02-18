@@ -49,7 +49,7 @@ func inputHeaders(reqs *models.ReqsWrapper) {
 	var menu int = -1
 	var headers []models.ReqsHeader
 	for menu != 0 {
-		fmt.Print("\n\n1.Add Header\n2.Done\n\nChoose menu :")
+		fmt.Print("\n1.Add Header\n2.Done\n\nChoose menu :")
 		_, err := fmt.Scanln(&menu)
 		if err != nil {
 			fmt.Println("Invalid input")
@@ -98,7 +98,7 @@ func inputCookies(reqs *models.ReqsWrapper) {
 	var menu int = -1
 	var cookies []models.ReqsCookie
 	for menu != 0 {
-		fmt.Print("\n\n1.Add Cookies\n2.Done\n\nChoose menu :")
+		fmt.Print("\n1.Add Cookies\n2.Done\n\nChoose menu :")
 		_, err := fmt.Scanln(&menu)
 		if err != nil {
 			fmt.Println("Invalid input")
@@ -176,7 +176,7 @@ func CreateRequest(project *models.Project) (menu int) {
 
 		//input payload type
 		var ptype int
-		fmt.Print("\n\n1.JSON\n2.Multipart form\n\nChoose menu\n(input anything if payload is none):")
+		fmt.Print("\n1.JSON\n2.Multipart form\n\nChoose menu\n(input anything if payload is none):")
 		_, err = fmt.Scanln(&ptype)
 		if err != nil {
 			reqs.PayloadType = "None"
