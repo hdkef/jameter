@@ -72,6 +72,10 @@ func loadTestByTotalReqs(project *models.Project, req models.ReqsWrapper) int {
 			fmt.Println("Input invalid")
 			continue
 		}
+		if totalReqs <= 0 {
+			fmt.Println("Input cannot be <= 0")
+			continue
+		}
 		validTotalReq = true
 	}
 
