@@ -193,12 +193,16 @@ func CreateRequest(project *models.Project) (menu int) {
 		isWrapperValid = true
 	}
 	//menu payload
-	switch reqs.Payload {
+	switch reqs.PayloadType {
 	case "None":
 		break
 	case "JSON":
-
+		InputJSONPayload(&reqs)
 	}
-	fmt.Println("new request created : ", reqs)
+
+	//if all set, append new reqs to pointer projects eqs
+	project.Reqs = append(project.Reqs, reqs)
+
+	fmt.Println("New request is created : ", reqs)
 	return -1
 }
