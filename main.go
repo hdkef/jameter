@@ -17,5 +17,7 @@ func main() {
 	}
 
 	//shows main menu
-	fmt.Println("main menu", project.Name)
+	delivery.MainMenu(&project)
+
+	fmt.Println("jameter by hdkef")
 }
