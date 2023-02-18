@@ -14,20 +14,20 @@ import (
 	"github.com/hdkef/jameter/usecase"
 )
 
-func resChanListener(resultC chan *http.Response, wg *sync.WaitGroup, closeC chan bool) {
+func resChanListener(resultC chan *models.ResultChan, wg *sync.WaitGroup, closeC chan bool) {
 	for {
 		res := <-resultC
 
 		var output string
 
 		//handle response body according to MIME type
-		defer res.Body.Close()
-		bodyBytes, err := io.ReadAll(res.Body)
+		defer res.Res.Body.Close()
+		bodyBytes, err := io.ReadAll(res.Res.Body)
 		if err != nil {
 			fmt.Print(err.Error())
 		}
 		var body interface{}
-		if res.Header.Get("Accept") == "application/json" {
+		if res.Res.Header.Get("Accept") == "application/json" {
 			var jsonBody map[string]interface{}
 			err = json.Unmarshal(bodyBytes, &jsonBody)
 			if err != nil {
@@ -38,21 +38,25 @@ func resChanListener(resultC chan *http.Response, wg *sync.WaitGroup, closeC cha
 			body = string(bodyBytes)
 		}
 
-		output += fmt.Sprint("Date\t\t: ", time.Now().String(), "\n")
-		output += fmt.Sprint("Status Code\t: ", res.StatusCode, "\n")
-		output += fmt.Sprint("Status Info\t: ", res.Status, "\n")
-		output += fmt.Sprint("Body\t\t: \n", body, "\n")
+		output += fmt.Sprint("Date\t: ", time.Now().String(), "\n")
+		output += fmt.Sprint("Status Code\t: ", res.Res.StatusCode, "\n")
+		output += fmt.Sprint("Status Info\t: ", res.Res.Status, "\n")
+
+		//output response header
+		for k, v := range res.Res.Header {
+			output += fmt.Sprintf("%s\t: %s\n", k, v)
+		}
+
+		output += fmt.Sprint("Body\t: \n", body, "\n")
 		output += "\n\n\n"
 
 		//append output to file
 
-		fileName := fmt.Sprintf("%s_%s_%s",
-			res.Request.Method,
-			res.Request.URL.Host,
-			res.Request.URL.Path)
+		fileName := fmt.Sprintf("%s_%s",
+			res.Req.Name,
+			res.Res.Request.URL.Host)
 
-		fileName = strings.ReplaceAll(fileName, ".", "_")
-		fileName = strings.ReplaceAll(fileName, "/", "_")
+		fileName = strings.ReplaceAll(fileName, " ", "_")
 		fileName += ".jamet"
 
 		fileDir := fmt.Sprintf("output/%s", fileName)
@@ -68,7 +72,7 @@ func resChanListener(resultC chan *http.Response, wg *sync.WaitGroup, closeC cha
 		}
 
 		//print result status
-		fmt.Printf("\nStatus\t\t: %d\n", res.StatusCode)
+		fmt.Printf("\nStatus\t\t: %d\n", res.Res.StatusCode)
 		fmt.Printf("Details on\t: %s\n", fileDir)
 
 		wg.Done()
@@ -82,7 +86,7 @@ func addPayload(req *http.Request, r *models.ReqsWrapper) {
 
 }
 
-func hit(r *models.ReqsWrapper, resultC chan *http.Response, wg *sync.WaitGroup, client *http.Client) {
+func hit(r *models.ReqsWrapper, resultC chan *models.ResultChan, wg *sync.WaitGroup, client *http.Client) {
 	//create new request
 	req, err := http.NewRequest(r.Method, r.URI, nil)
 
@@ -117,11 +121,14 @@ func hit(r *models.ReqsWrapper, resultC chan *http.Response, wg *sync.WaitGroup,
 
 	//decode response
 
-	resultC <- resp
+	resultC <- &models.ResultChan{
+		Res: resp,
+		Req: r,
+	}
 }
 
 func ExecuteByIDS(project *models.Project) {
-	var resultC chan *http.Response = make(chan *http.Response)
+	var resultC chan *models.ResultChan = make(chan *models.ResultChan)
 	var doneC chan bool = make(chan bool)
 
 	//input ids to be executed
@@ -169,7 +176,7 @@ func ExecuteByIDS(project *models.Project) {
 }
 
 func ExecuteAll(project *models.Project) {
-	var resultC chan *http.Response = make(chan *http.Response)
+	var resultC chan *models.ResultChan = make(chan *models.ResultChan)
 	var doneC chan bool = make(chan bool)
 
 	//create waitGroup
