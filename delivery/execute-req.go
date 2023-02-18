@@ -1,18 +1,76 @@
 package delivery
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/hdkef/jameter/models"
 	"github.com/hdkef/jameter/usecase"
 )
 
-func resChanListener(resultC chan interface{}, wg *sync.WaitGroup, closeC chan bool) {
+func resChanListener(resultC chan *http.Response, wg *sync.WaitGroup, closeC chan bool) {
 	for {
 		res := <-resultC
-		fmt.Println("\n", res)
+
+		var output string
+
+		//handle response body according to MIME type
+		defer res.Body.Close()
+		bodyBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		var body interface{}
+		if res.Header.Get("Accept") == "application/json" {
+			var jsonBody map[string]interface{}
+			err = json.Unmarshal(bodyBytes, &jsonBody)
+			if err != nil {
+				fmt.Print(err.Error())
+			}
+			body = jsonBody
+		} else {
+			body = string(bodyBytes)
+		}
+
+		output += fmt.Sprint("Date\t\t: ", time.Now().String(), "\n")
+		output += fmt.Sprint("Status Code\t: ", res.StatusCode, "\n")
+		output += fmt.Sprint("Status Info\t: ", res.Status, "\n")
+		output += fmt.Sprint("Body\t\t: \n", body, "\n")
+		output += "\n\n\n"
+
+		//append output to file
+
+		fileName := fmt.Sprintf("%s_%s_%s",
+			res.Request.Method,
+			res.Request.URL.Host,
+			res.Request.URL.Path)
+
+		fileName = strings.ReplaceAll(fileName, ".", "_")
+		fileName = strings.ReplaceAll(fileName, "/", "_")
+		fileName += ".jamet"
+
+		fileDir := fmt.Sprintf("output/%s", fileName)
+
+		f, err := os.OpenFile(fileDir, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+
+		defer f.Close()
+		if _, err := f.WriteString(output); err != nil {
+			fmt.Print(err.Error())
+		}
+
+		//print result status
+		fmt.Printf("\nStatus\t\t: %d\n", res.StatusCode)
+		fmt.Printf("Details on\t: %s\n", fileDir)
+
 		wg.Done()
 		if done := <-closeC; done {
 			break
@@ -24,12 +82,13 @@ func addPayload(req *http.Request, r *models.ReqsWrapper) {
 
 }
 
-func hit(r *models.ReqsWrapper, resultC chan interface{}, wg *sync.WaitGroup, client *http.Client) {
+func hit(r *models.ReqsWrapper, resultC chan *http.Response, wg *sync.WaitGroup, client *http.Client) {
 	//create new request
 	req, err := http.NewRequest(r.Method, r.URI, nil)
 
 	if err != nil {
 		wg.Done()
+		return
 	}
 
 	//add headers
@@ -53,6 +112,7 @@ func hit(r *models.ReqsWrapper, resultC chan interface{}, wg *sync.WaitGroup, cl
 	resp, err := client.Do(req)
 	if err != nil {
 		wg.Done()
+		return
 	}
 
 	//decode response
@@ -61,7 +121,7 @@ func hit(r *models.ReqsWrapper, resultC chan interface{}, wg *sync.WaitGroup, cl
 }
 
 func ExecuteByIDS(project *models.Project) {
-	var resultC chan interface{} = make(chan interface{})
+	var resultC chan *http.Response = make(chan *http.Response)
 	var doneC chan bool = make(chan bool)
 
 	//input ids to be executed
@@ -109,7 +169,7 @@ func ExecuteByIDS(project *models.Project) {
 }
 
 func ExecuteAll(project *models.Project) {
-	var resultC chan interface{} = make(chan interface{})
+	var resultC chan *http.Response = make(chan *http.Response)
 	var doneC chan bool = make(chan bool)
 
 	//create waitGroup
