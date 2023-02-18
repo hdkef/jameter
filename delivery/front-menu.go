@@ -10,16 +10,17 @@ import (
 )
 
 func inputProjectName(name *string) (msg string, valid bool) {
+	var validator usecase.Validator
 	fmt.Print("Input project name: ")
 	//input project name
 	_, err := fmt.Scanln(name)
 	if err != nil {
-		msg = "invalid input"
+		msg = "Invalid input"
 		return
 	}
 
 	//validate project name
-	msg, valid = usecase.OnlyWordsOrDigit(*name)
+	msg, valid = validator.OnlyWordsOrDigit(*name)
 	if !valid {
 		return
 	}
@@ -57,7 +58,7 @@ func openProject(project *models.Project) (menu int, valid bool) {
 	byteValue, err := os.ReadFile(fmt.Sprintf("data/%s.json", name))
 	if err != nil {
 		menu = -1
-		fmt.Println("cannot load .json")
+		fmt.Println("Cannot load .json")
 		return
 	}
 
@@ -65,7 +66,7 @@ func openProject(project *models.Project) (menu int, valid bool) {
 	err = json.Unmarshal(byteValue, project)
 	if err != nil {
 		menu = -1
-		fmt.Println("cannot unmarshall json")
+		fmt.Println("Cannot unmarshall json")
 		return
 	}
 
@@ -81,7 +82,7 @@ func FrontMenu(project *models.Project) (msg string, valid bool) {
 		fmt.Print("1.Open project\n2.Create new project\n3.Exit\n\nChoose menu : ")
 		_, err := fmt.Scanln(&menu)
 		if err != nil {
-			msg = "invalid menu"
+			msg = "Invalid menu"
 			return
 		}
 		switch menu {
