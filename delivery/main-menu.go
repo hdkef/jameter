@@ -9,7 +9,7 @@ import (
 func MainMenu(project *models.Project) {
 	var menu int = -1
 	for menu != 0 {
-		fmt.Print("1.Read request\n2.Create request\n3.Update request\n3.Delete request\n4.Execute request\n5.Save\n6.Quit\n7.Delete project\n\nChoose menu : ")
+		fmt.Print("\n\n1.Read request\n2.Create request\n3.Update request\n4.Delete request\n5.Execute request\n6.Save\n7.Quit\n8.Delete project\n\nChoose menu : ")
 		_, err := fmt.Scanln(&menu)
 		if err != nil {
 			fmt.Println("Invalid menu")
@@ -23,12 +23,14 @@ func MainMenu(project *models.Project) {
 		case 3:
 			menu = UpdateRequest(project)
 		case 4:
-			menu = ExecuteRequest(project)
+			menu = DeleteRequest(project)
 		case 5:
-			menu = SaveProject(project)
+			menu = ExecuteRequest(project)
 		case 6:
-			menu = 0
+			menu = SaveProject(project)
 		case 7:
+			menu = 0
+		case 8:
 			menu = DeleteProject(project)
 		}
 	}

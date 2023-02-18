@@ -12,7 +12,7 @@ func InputJSONPayload(reqs *models.ReqsWrapper) {
 	var jsonStr string
 	for menu != 0 {
 		//input json string
-		fmt.Printf("Input JSON :")
+		fmt.Printf("\nInput JSON :")
 		_, err := fmt.Scanln(&jsonStr)
 		if err != nil {
 			fmt.Println("Invalid input")

@@ -49,7 +49,7 @@ func inputHeaders(reqs *models.ReqsWrapper) {
 	var menu int = -1
 	var headers []models.ReqsHeader
 	for menu != 0 {
-		fmt.Print("1.Add Header\n2.Done\n\nChoose menu :")
+		fmt.Print("\n\n1.Add Header\n2.Done\n\nChoose menu :")
 		_, err := fmt.Scanln(&menu)
 		if err != nil {
 			fmt.Println("Invalid input")
@@ -98,7 +98,7 @@ func inputCookies(reqs *models.ReqsWrapper) {
 	var menu int = -1
 	var cookies []models.ReqsCookie
 	for menu != 0 {
-		fmt.Print("1.Add Cookies\n2.Done\n\nChoose menu :")
+		fmt.Print("\n\n1.Add Cookies\n2.Done\n\nChoose menu :")
 		_, err := fmt.Scanln(&menu)
 		if err != nil {
 			fmt.Println("Invalid input")
@@ -125,7 +125,7 @@ func CreateRequest(project *models.Project) (menu int) {
 		reqs.ID = len(project.Reqs) + 1
 
 		//input name
-		fmt.Print("Input request name :")
+		fmt.Print("\nInput request name :")
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
 		name := scanner.Text()
@@ -139,7 +139,7 @@ func CreateRequest(project *models.Project) (menu int) {
 		reqs.Name = name
 
 		//input Method
-		fmt.Print("Input Method :")
+		fmt.Print("\nInput Method :")
 		_, err := fmt.Scanln(&reqs.Method)
 		if err != nil {
 			fmt.Println("Invalid input")
@@ -154,7 +154,7 @@ func CreateRequest(project *models.Project) (menu int) {
 		}
 
 		//input URI
-		fmt.Print("Input URI :")
+		fmt.Print("\nInput URI :")
 		_, err = fmt.Scanln(&reqs.URI)
 		if err != nil {
 			fmt.Println("Invalid input")
@@ -176,7 +176,7 @@ func CreateRequest(project *models.Project) (menu int) {
 
 		//input payload type
 		var ptype int
-		fmt.Print("1.JSON\n2.Multipart form\n\nChoose menu\n(input anything if payload is none):")
+		fmt.Print("\n\n1.JSON\n2.Multipart form\n\nChoose menu\n(input anything if payload is none):")
 		_, err = fmt.Scanln(&ptype)
 		if err != nil {
 			reqs.PayloadType = "None"

@@ -1,27 +1,4 @@
 {
  "Name": "projectku",
- "Reqs": [
-  {
-   "ID": 1,
-   "Name": "GET ALL USERS",
-   "Method": "GET",
-   "URI": "https://localhost:8080",
-   "Headers": [
-    {
-     "Name": "BEARER",
-     "Value": "asd57HGF8sdan324"
-    }
-   ],
-   "Cookies": [
-    {
-     "Name": "telemetry",
-     "Value": "sadyISDA723NSD"
-    }
-   ],
-   "PayloadType": "JSON",
-   "Payload": {
-    "Data": "{\"name\":\"hadekha\"}"
-   }
-  }
- ]
+ "Reqs": []
 }
