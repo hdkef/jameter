@@ -12,7 +12,9 @@ import (
 func tagAsDone(resp *http.Response, wg *sync.WaitGroup, mtx *sync.Mutex, resultMap map[int]int, counter *int) {
 	mtx.Lock()
 	*counter++
-	fmt.Println(*counter)
+	if *counter%100 == 0 {
+		fmt.Println(*counter)
+	}
 	if resp.StatusCode != 0 {
 		resultMap[resp.StatusCode]++
 	}
