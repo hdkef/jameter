@@ -12,7 +12,9 @@ import (
 func tagAsDone(resp *http.Response, wg *sync.WaitGroup, mtx *sync.Mutex, resultMap map[int]int, counter *int) {
 	mtx.Lock()
 	*counter++
-	fmt.Println(*counter)
+	if *counter%100 == 0 {
+		fmt.Println(*counter)
+	}
 	if resp.StatusCode != 0 {
 		resultMap[resp.StatusCode]++
 	}
@@ -72,6 +74,10 @@ func loadTestByTotalReqs(project *models.Project, req models.ReqsWrapper) int {
 			fmt.Println("Input invalid")
 			continue
 		}
+		if totalReqs <= 0 {
+			fmt.Println("Total req cannot be <= 0")
+			continue
+		}
 		validTotalReq = true
 	}
 
@@ -95,7 +101,7 @@ func loadTestByTotalReqs(project *models.Project, req models.ReqsWrapper) int {
 	timeTaken := time.Since(startTime).Milliseconds()
 
 	fmt.Printf("URI\t\t\t: %s\n", req.URI)
-	fmt.Printf("total requests\t: %d\n", counter)
+	fmt.Printf("total requests\t\t: %d\n", counter)
 	fmt.Printf("time taken\t\t: %d ms\n", timeTaken)
 	fmt.Printf("throughput\t\t: %.3f req/s\n", 1000*float64(totalReqs)/float64(timeTaken))
 
