@@ -37,8 +37,22 @@ func tagAsDone(resp *http.Response, wg *sync.WaitGroup, mtx *sync.Mutex, resultM
 
 func byReqhit(r models.ReqsWrapper, wg *sync.WaitGroup, counter *int, mtx *sync.Mutex, client *http.Client, resultMap map[int]int) {
 	//hit endpoint
+	//decode payload
+	//add payload
+	bodyReader, err := addPayload(&r)
+	if err != nil {
+		fmt.Println(err.Error())
+		wg.Done()
+		return
+	}
+
 	//create new request
-	req, err := http.NewRequest(r.Method, r.URI, nil)
+	var req *http.Request
+	if bodyReader != nil {
+		req, err = http.NewRequest(r.Method, r.URI, bodyReader)
+	} else {
+		req, err = http.NewRequest(r.Method, r.URI, nil)
+	}
 
 	if err != nil {
 		// fmt.Println(err.Error())
@@ -59,9 +73,6 @@ func byReqhit(r models.ReqsWrapper, wg *sync.WaitGroup, counter *int, mtx *sync.
 		}
 		req.AddCookie(&cookies)
 	}
-
-	//add payload
-	addPayload(req, &r)
 
 	//execute the request
 	resp, err := client.Do(req)
@@ -142,11 +153,24 @@ out:
 
 func byTimeHit(client *http.Client, r models.ReqsWrapper, resultC chan *http.Response) {
 	//hit endpoint
+	//decode payload
+	//add payload
+	bodyReader, err := addPayload(&r)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
 	//create new request
-	req, err := http.NewRequest(r.Method, r.URI, nil)
+	var req *http.Request
+	if bodyReader != nil {
+		req, err = http.NewRequest(r.Method, r.URI, bodyReader)
+	} else {
+		req, err = http.NewRequest(r.Method, r.URI, nil)
+	}
 
 	if err != nil {
-		// fmt.Println(err.Error())
+		fmt.Println(err.Error())
 		return
 	}
 
@@ -163,9 +187,6 @@ func byTimeHit(client *http.Client, r models.ReqsWrapper, resultC chan *http.Res
 		}
 		req.AddCookie(&cookies)
 	}
-
-	//add payload
-	addPayload(req, &r)
 
 	//execute the request
 	resp, err := client.Do(req)
