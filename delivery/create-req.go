@@ -14,7 +14,7 @@ func addHeader(reqs *models.ReqsWrapper, headers *[]models.ReqsHeader) int {
 	// var validator usecase.Validator
 	var name string
 	//input header name
-	fmt.Print("Header name :")
+	fmt.Print("\nInput header name :")
 	_, err := fmt.Scanln(&name)
 	if err != nil {
 		fmt.Println("Invalid input")
@@ -30,7 +30,7 @@ func addHeader(reqs *models.ReqsWrapper, headers *[]models.ReqsHeader) int {
 
 	//input header value
 	var value string
-	fmt.Print("Header value :")
+	fmt.Print("\nInput header value :")
 	_, err = fmt.Scanln(&value)
 	if err != nil {
 		fmt.Println("Invalid input")
@@ -70,7 +70,7 @@ func inputHeaders(reqs *models.ReqsWrapper) {
 func addCookie(reqs *models.ReqsWrapper, cookies *[]models.ReqsCookie) int {
 	var name string
 	//input header name
-	fmt.Print("Cookie name :")
+	fmt.Print("\nInput cookie name :")
 	_, err := fmt.Scanln(&name)
 	if err != nil {
 		fmt.Println("Invalid input")
@@ -79,7 +79,7 @@ func addCookie(reqs *models.ReqsWrapper, cookies *[]models.ReqsCookie) int {
 
 	//input header value
 	var value string
-	fmt.Print("Cookie value :")
+	fmt.Print("\nInput cookie value :")
 	_, err = fmt.Scanln(&value)
 	if err != nil {
 		fmt.Println("Invalid input")
