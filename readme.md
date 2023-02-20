@@ -11,5 +11,5 @@ cookies for each request.
 Jameter can managed all request created under the name of project, or can import project with file with .json extension
 ### 3. Assert Response (0 %)
 Jameter can assert response for each request using regexp to make it easy for checking
-### 4. Load Test (0 %)
+### 4. Load Test (100 %)
 Jameter can hit with specified number of request and provide useful information
