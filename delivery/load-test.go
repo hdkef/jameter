@@ -18,6 +18,8 @@ func printLoadTestResult(req models.ReqsWrapper, counter int, timeTaken int64, t
 	for k, v := range resultMap {
 		fmt.Printf("Status Code %d total\t: %d\n", k, v)
 	}
+
+	fmt.Println("result may vary, make sure web servers don't limit req per ip")
 }
 
 func tagAsDone(resp *http.Response, wg *sync.WaitGroup, mtx *sync.Mutex, resultMap map[int]int, counter *int) {
@@ -116,41 +118,35 @@ func loadTestByTotalReqs(project *models.Project, req models.ReqsWrapper) int {
 	return 0
 }
 
-func byTimeResultListener(resultC chan *http.Response, doneC chan bool, closeC chan bool, wg *sync.WaitGroup, mtx *sync.Mutex, counter *int, resultMap map[int]int) {
+func byTimeResultListener(resultC chan *http.Response, doneC chan bool, mtx *sync.Mutex, counter *int, resultMap map[int]int) {
 	isDone := false
 out:
 	for {
 		select {
-		case <-closeC:
-			//if closeC is triggered, close all channel
-			close(closeC)
-			close(resultC)
-			break out
 		case <-doneC:
 			isDone = true
+			break out
 		case r := <-resultC:
 			if isDone {
 				//if is done is true, ignore any new response
-				wg.Done()
 				continue
 			}
 			mtx.Lock()
 			*counter++
+			// time.Sleep(1 * time.Millisecond)
 			resultMap[r.StatusCode]++
 			mtx.Unlock()
-			wg.Done()
 		}
 	}
 }
 
-func byTimeHit(client *http.Client, r models.ReqsWrapper, wg *sync.WaitGroup, resultC chan *http.Response) {
+func byTimeHit(client *http.Client, r models.ReqsWrapper, resultC chan *http.Response) {
 	//hit endpoint
 	//create new request
 	req, err := http.NewRequest(r.Method, r.URI, nil)
 
 	if err != nil {
 		// fmt.Println(err.Error())
-		wg.Done()
 		return
 	}
 
@@ -175,7 +171,6 @@ func byTimeHit(client *http.Client, r models.ReqsWrapper, wg *sync.WaitGroup, re
 	resp, err := client.Do(req)
 	if err != nil {
 		// fmt.Println(err.Error())
-		wg.Done()
 		return
 	}
 
@@ -188,7 +183,6 @@ func loadTestByTime(project *models.Project, req models.ReqsWrapper) int {
 	totalTime := 0
 	var resultC chan *http.Response = make(chan *http.Response)
 	var doneC chan bool = make(chan bool)
-	var closeC chan bool = make(chan bool)
 
 	//input time in ms
 	for !validTotalTime {
@@ -202,13 +196,12 @@ func loadTestByTime(project *models.Project, req models.ReqsWrapper) int {
 	}
 
 	//validate total time
-	if totalTime <= 100 {
-		fmt.Println("Input minimal 100 ms")
+	if totalTime < 20000 {
+		fmt.Println("Input minimal 20000 ms")
 		return 0
 	}
 
 	//execute reqs
-	wg := sync.WaitGroup{}
 	client := &http.Client{}
 	mtx := sync.Mutex{}
 	var counter int
@@ -216,7 +209,7 @@ func loadTestByTime(project *models.Project, req models.ReqsWrapper) int {
 
 	//create timer
 	isDone := false
-	go time.AfterFunc(time.Duration(totalTime*int(time.Millisecond)), func() {
+	time.AfterFunc(time.Duration(totalTime*int(time.Millisecond)), func() {
 		fmt.Println("timer done")
 		isDone = true
 		doneC <- true
@@ -224,18 +217,16 @@ func loadTestByTime(project *models.Project, req models.ReqsWrapper) int {
 	})
 
 	//listener
-	go byTimeResultListener(resultC, doneC, closeC, &wg, &mtx, &counter, resultMap)
+	go byTimeResultListener(resultC, doneC, &mtx, &counter, resultMap)
 
 	for !isDone {
 		//hit
-		wg.Add(1)
-		go byTimeHit(client, req, &wg, resultC)
+		go byTimeHit(client, req, resultC)
 	}
 
-	wg.Wait()
 	//when done, tell listener to close chan
 	printLoadTestResult(req, counter, int64(totalTime), counter, resultMap)
-	closeC <- true
+	// closeC <- true
 
 	return 0
 }
