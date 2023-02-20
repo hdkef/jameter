@@ -11,7 +11,7 @@ import (
 )
 
 func addHeader(reqs *models.ReqsWrapper, headers *[]models.ReqsHeader) int {
-	var validator usecase.Validator
+	// var validator usecase.Validator
 	var name string
 	//input header name
 	fmt.Print("Header name :")
@@ -22,11 +22,11 @@ func addHeader(reqs *models.ReqsWrapper, headers *[]models.ReqsHeader) int {
 	}
 
 	//validate header name
-	msg, v := validator.OnlyWordsOrDigit(name)
-	if !v {
-		fmt.Println(msg)
-		return -1
-	}
+	// msg, v := validator.OnlyWordsOrDigit(name)
+	// if !v {
+	// 	fmt.Println(msg)
+	// 	return -1
+	// }
 
 	//input header value
 	var value string
@@ -79,7 +79,7 @@ func addCookie(reqs *models.ReqsWrapper, cookies *[]models.ReqsCookie) int {
 
 	//input header value
 	var value string
-	fmt.Print("Header value :")
+	fmt.Print("Cookie value :")
 	_, err = fmt.Scanln(&value)
 	if err != nil {
 		fmt.Println("Invalid input")
@@ -90,7 +90,7 @@ func addCookie(reqs *models.ReqsWrapper, cookies *[]models.ReqsCookie) int {
 		Name:  name,
 		Value: value,
 	})
-	fmt.Println("header added")
+	fmt.Println("cookie added")
 	return -1
 }
 
