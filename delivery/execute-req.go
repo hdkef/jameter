@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -94,13 +95,48 @@ out:
 	}
 }
 
-func addPayload(req *http.Request, r *models.ReqsWrapper) {
-
+func addPayload(r *models.ReqsWrapper) (*bytes.Reader, error) {
+	//jika payload JSON
+	if r.PayloadType == "JSON" {
+		//marshal to []byte
+		d, err := json.Marshal(r.Payload)
+		if err != nil {
+			return nil, err
+		}
+		//unmarshal to struct
+		var p models.ReqsJSON
+		err = json.Unmarshal(d, &p)
+		if err != nil {
+			return nil, err
+		}
+		//marshal only p.Data
+		jsonBody, err := json.Marshal(p.Data)
+		if err != nil {
+			return nil, err
+		}
+		bodyReader := bytes.NewReader(jsonBody)
+		return bodyReader, nil
+	}
+	return nil, nil
 }
 
 func hit(r models.ReqsWrapper, resultC chan *models.ResultChan, wg *sync.WaitGroup, client *http.Client) {
+	//decode payload
+	//add payload
+	bodyReader, err := addPayload(&r)
+	if err != nil {
+		fmt.Println(err.Error())
+		wg.Done()
+		return
+	}
+
 	//create new request
-	req, err := http.NewRequest(r.Method, r.URI, nil)
+	var req *http.Request
+	if bodyReader != nil {
+		req, err = http.NewRequest(r.Method, r.URI, bodyReader)
+	} else {
+		req, err = http.NewRequest(r.Method, r.URI, nil)
+	}
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -121,9 +157,6 @@ func hit(r models.ReqsWrapper, resultC chan *models.ResultChan, wg *sync.WaitGro
 		}
 		req.AddCookie(&cookies)
 	}
-
-	//add payload
-	addPayload(req, &r)
 
 	//execute the request
 	resp, err := client.Do(req)
