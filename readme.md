@@ -15,6 +15,5 @@ Jameter can assert response for each request using regexp to make it easy for ch
 Jameter can hit with specified number of request and provide useful information
 
 ## to do
-1. Update request that has been created
-2. multipart form support
-3. Assertion feature
+1. multipart form support
+2. Assertion feature
