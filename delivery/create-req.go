@@ -122,7 +122,13 @@ func CreateRequest(project *models.Project) (menu int) {
 	var validator usecase.Validator
 	for !isWrapperValid {
 		//assign ID
-		reqs.ID = len(project.Reqs) + 1
+		biggest := 0
+		for _, v := range project.Reqs {
+			if v.ID > biggest {
+				biggest = v.ID
+			}
+		}
+		reqs.ID = biggest + 1
 
 		//input name
 		fmt.Print("\nInput request name :")
